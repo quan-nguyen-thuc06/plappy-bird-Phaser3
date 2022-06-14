@@ -141,10 +141,10 @@ export default class PlayScene extends Phaser.Scene {
     private handleGameOver(){
         console.log("Overlapping") 
         this.audioBackground.pause()
+        this.speed = 0;
+        this.bird.setAlive(false);
         if(!this.audioHit.isPlaying&&!this.checkPlayAudioHit){
             this.audioHit.play();
-            this.speed = 0;
-            this.bird.setAlive(false);
             if(this.heightScore<this.score)
                 this.heightScore = this.score
             this.panelGameOver.setScore(this.score,this.heightScore);

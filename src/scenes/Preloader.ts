@@ -9,6 +9,20 @@ export default class Preloader extends Phaser.Scene{
         super(SceneKeys.Preloader); // key of the scene
     }
     preload(){
+        var progressBar = this.add.graphics();
+        var progressBox = this.add.graphics();
+        progressBox.fillStyle(0x222222, 0.8);
+        progressBox.fillRect(240, 270, 320, 50);
+        const {width, height} = this.scale
+        var percentText = this.add.text(
+            width / 2,
+            height / 2 - 5,
+            '0%',
+            {
+                font: '18px monospace',
+            }
+        );
+        percentText.setOrigin(0.5, 0.5);
         this.load.image(
             TextureKeys.Background, 
             'Images/background/background-night.png');
@@ -54,22 +68,36 @@ export default class Preloader extends Phaser.Scene{
         this.load.audio(AudioKeys.Background,[
             'audio/orchestrawav-26158.mp3'
         ])
+
+        this.load.on('progress', function (value) {
+            console.log(value);
+            progressBar.clear();
+            progressBar.fillStyle(0xffffff, 1);
+            progressBar.fillRect(250, 280, 300 * value, 30);
+            percentText.setText(parseInt((value * 100).toString()) + '%');
+        });
+
+        this.load.on('complete', function () {
+            progressBar.destroy();
+            progressBar.destroy();
+            percentText.destroy();
+        });
+        
     }
     create(){
-    
-    this.anims.create({
-        key: AnimationKeys.BirdFly, // name of this animation
-        // helper to generate frames
-        frames: this.anims.generateFrameNames(TextureKeys.Bird, {
-        start: 1,
-        end: 8,
-        prefix: 'frame-',
-        zeroPad: 1, // so chu so
-        suffix: '.png'
-        }),
-        frameRate: 20,
-        repeat: -1 // -1 to loop forever
-    })
+        this.anims.create({
+            key: AnimationKeys.BirdFly, // name of this animation
+            // helper to generate frames
+            frames: this.anims.generateFrameNames(TextureKeys.Bird, {
+            start: 1,
+            end: 8,
+            prefix: 'frame-',
+            zeroPad: 1, // so chu so
+            suffix: '.png'
+            }),
+            frameRate: 20,
+            repeat: -1 // -1 to loop forever
+        })
         this.scene.start(SceneKeys.StartGame); 
     }
 }
