@@ -18,12 +18,16 @@ export default class Preloader extends Phaser.Scene{
             TextureKeys.Pipe,
             'obstacle/pipe-green.png');
         this.load.image(
-            TextureKeys.Message,
+            TextureKeys.GameOver,
             'Images/panelGameOver/gameOver.png'
         )
         this.load.image(
             TextureKeys.ReplayButton,
             'Images/panelGameOver/replay-button.png'
+        )
+        this.load.image(
+            TextureKeys.Message,
+            'Images/gameStart/message.png'
         )
         this.load.atlas(
             TextureKeys.Bird,
@@ -43,9 +47,9 @@ export default class Preloader extends Phaser.Scene{
         zeroPad: 1, // so chu so
         suffix: '.png'
         }),
-        frameRate: 10,
+        frameRate: 20,
         repeat: -1 // -1 to loop forever
     })
-        this.scene.start(SceneKeys.Game); 
+        this.scene.start(SceneKeys.StartGame); 
     }
 }

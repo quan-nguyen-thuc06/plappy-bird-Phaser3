@@ -13,7 +13,7 @@ export default class GameOver extends Phaser.Scene{
             .setOrigin(0)
         this.add.tileSprite(0, 500, width, height, TextureKeys.Ground)
             .setOrigin(0)
-        const textGameOver = this.add.image(width*0.5, height*0.3, TextureKeys.Message)
+        const textGameOver = this.add.image(width*0.5, height*0.3, TextureKeys.GameOver)
             .setOrigin(0.5)
         textGameOver.setDisplaySize(textGameOver.width *3,textGameOver.height *3)
         const replayButton = this.add.image(width*0.5,height *0.6, TextureKeys.ReplayButton);

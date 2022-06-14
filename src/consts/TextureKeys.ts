@@ -5,5 +5,6 @@ enum TextureKeys{
     Pipe = 'pipe',
     Message = 'message',
     ReplayButton = 'replay-button',
+    GameOver = 'game-over',
 }
 export default TextureKeys;
