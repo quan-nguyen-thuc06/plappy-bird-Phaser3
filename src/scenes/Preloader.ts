@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import AnimationKeys from "~/consts/AnimationKeys";
+import AudioKeys from "~/consts/AudioKeys";
 import SceneKeys from "~/consts/SceneKeys";
 import TextureKeys from "~/consts/TextureKeys";
 
@@ -16,7 +17,7 @@ export default class Preloader extends Phaser.Scene{
             'Images/ground/base.png');
         this.load.image(
             TextureKeys.Pipe,
-            'obstacle/pipe-green.png');
+            'Images/obstacle/pipe-green.png');
         this.load.image(
             TextureKeys.GameOver,
             'Images/panelGameOver/gameOver.png'
@@ -29,11 +30,30 @@ export default class Preloader extends Phaser.Scene{
             TextureKeys.Message,
             'Images/gameStart/message.png'
         )
+        this.load.image(
+            TextureKeys.Bullet,
+            'Images/bullet.png'
+        )
         this.load.atlas(
             TextureKeys.Bird,
-            'character.png',
-            'character.json'
+            'Images/character.png',
+            'Images/character.json'
         ) 
+        this.load.audio(AudioKeys.Fly,[
+            'audio/swoosh.mp3'
+        ])
+        this.load.audio(AudioKeys.Point,[
+            'audio/point.mp3'
+        ])
+        this.load.audio(AudioKeys.Hit,[
+            'audio/hit.mp3'
+        ])
+        this.load.audio(AudioKeys.Die,[
+            'audio/die.mp3'
+        ])
+        this.load.audio(AudioKeys.Background,[
+            'audio/orchestrawav-26158.mp3'
+        ])
     }
     create(){
     
