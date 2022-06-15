@@ -7,6 +7,10 @@ var Const = {
     numPipe : 3,
     birdWidth: 50,
     birdHeight: 50,
+    scene:{
+        width: 800,
+        height: 600,
+    },
 }  
 
 export default Const;

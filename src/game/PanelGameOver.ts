@@ -13,11 +13,12 @@ export default class GameOver extends Phaser.GameObjects.Container{
         const {width, height} = this.scene.scale;
         this.textGameOver = scene.add.image(width*0.5, height*0.3, TextureKeys.GameOver)
             .setOrigin(0.5)
-        this.textGameOver.setDepth(1);
+        this.textGameOver.setDepth(2);
         this.textGameOver.setDisplaySize(this.textGameOver.width *3,this.textGameOver.height *3)
         this.replayButton = scene.add.image(width*0.5,height *0.6, TextureKeys.ReplayButton);
-        this.replayButton.setDepth(1);
+        this.replayButton.setDepth(2);
         this.replayButton.setDisplaySize(this.replayButton.width/2,this.replayButton.height/2)
+            .setDepth(2)
             .setInteractive()
             .on('pointerdown', () => {
                 scene.scene.stop(SceneKeys.Game); 
@@ -36,7 +37,7 @@ export default class GameOver extends Phaser.GameObjects.Container{
             shadow: { fill: true, blur: 0, offsetY: 0 },
              padding: { left: 15, right: 15, top: 10, bottom: 10 }
             })
-            .setDepth(1);
+            .setDepth(2);
 
         this.highScore = this.scene.add.text(width*0.5,height *0.42, "High Score: 0", {
             fontSize: '36px',
@@ -45,7 +46,7 @@ export default class GameOver extends Phaser.GameObjects.Container{
             shadow: { fill: true, blur: 0, offsetY: 0 },
              padding: { left: 15, right: 15, top: 10, bottom: 10 }
             })
-            .setDepth(1);
+            .setDepth(2);
 
     }
 

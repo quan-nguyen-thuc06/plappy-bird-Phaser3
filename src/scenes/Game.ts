@@ -48,7 +48,7 @@ export default class PlayScene extends Phaser.Scene {
         this.checkPoint = [];
         this.speed = Const.speed;
         this.checkPlayAudioHit = false;
-        this.timerEvents = this.time.addEvent({ delay: 5000, loop: false });
+        this.timerEvents = this.time.addEvent({ delay: 7000 , loop: true });
         // store the width and height of the game screen
         const { width, height } = this.scale
 
@@ -58,7 +58,7 @@ export default class PlayScene extends Phaser.Scene {
         this.pipes = this.initListPipe(width);
         this.ground =  this.add.tileSprite(0, 500, width, height, TextureKeys.Ground)
             .setOrigin(0)
-            .setDepth(1)
+            .setDepth(2)
         this.bird = new Bird(this, width *0.25, height * 0.25).setDepth(1);
         this.bird.setAlive(true);
         this.add.existing(this.bird);
@@ -73,52 +73,29 @@ export default class PlayScene extends Phaser.Scene {
             0,0, // x, y
             Number.MAX_SAFE_INTEGER, height-100 // width, height
         )
-        this.virus = this.physics.add.image(
-            Phaser.Math.Between(width, width *1.5), 
-            height*0.5, TextureKeys.Virus)
-            .setDisplaySize(100,100);
+        this.virus = this.initVirus();
         this.audioBackground.play() 
-        this.input.on('pointerdown',()=>{
-            if(this.bird.getAlive()){
-                var bullet = this.physics.add.image(this.bird.x,this.bird.y, TextureKeys.Bullet);
-                const body = bullet.body as Phaser.Physics.Arcade.Body;
-                body.setVelocityX(1000);
-                body.setGravityY(980);
-                this.physics.add.overlap(bullet, this.virus,(obj1,obj2) => {
-                    obj2.destroy();
-                    console.log(this.virus); 
-                    obj1.destroy();
-                    this.audioHit.play()
-                });
-                this.physics.add.overlap(bullet, this.groupObstacle,(obj1,obj2) => {
-                    obj1.destroy();
-                    this.audioHit.play()
-                });
-            }
-        })
+        this.input.on('pointerdown',()=>this.shootBullets())
         this.physics.add.overlap(this.bird, this.groupObstacle,()=>this.handleGameOver());
         this.physics.add.overlap(this.bird, this.virus,()=>this.handleGameOver());
         this.physics.add.overlap(this.bird, this.checkPoint,(obj1,obj2) =>this.handleAddScore(obj1,obj2)); 
     }
     update(time: number, delta: number): void {
-        const { width, height } = this.scale
         this.background.tilePositionX += this.speed;
         this.ground.tilePositionX += this.speed;
         this.virus.x -= this.speed;  
         for (let i = 0; i <Const.numPipe;i++){
             this.pipes[i].x -= this.speed;
         } 
-        if(this.bird.y >= height-100-50){
+        if(this.bird.y >= Const.scene.height-100-50){
             this.handleGameOver()
         }  
-        if(this.virus.visible == false || this.virus.x <= -100) {
-            this.virus = this.physics.add.image(
-                Phaser.Math.Between(width, width *1.5), 
-                Phaser.Math.Between(height*0.1, height *0.8), 
-                TextureKeys.Virus)
-                .setDisplaySize(100,100)
-                .setDepth(1);
+        if(this.virus.visible == false || this.virus.x <= 20) {
+            this.virus.destroy();
+            this.virus = this.initVirus();
+            this.physics.add.overlap(this.bird, this.virus,()=>this.handleGameOver());
         };
+        this.virus.setDisplaySize(this.timerEvents.getProgress()*300,this.timerEvents.getProgress()*300 );
         this.wrapObstacle(); 
     }
 
@@ -132,7 +109,16 @@ export default class PlayScene extends Phaser.Scene {
             })
             .setDepth(1);
     }
-
+    private initVirus(){
+        var virus = this.physics.add.image(
+            Phaser.Math.Between(Const.scene.width, Const.scene.width *1.1), 
+            Phaser.Math.Between(Const.scene.height*0.1, Const.scene.height *0.8), 
+            TextureKeys.Virus)
+            .setDepth(1)
+            .setTint(0x0000ff, 0xff0000, 0xff00ff, 0xffff00)
+        virus.body.setCircle(190);
+        return virus;
+    }
     private initListPipe(width: number): Obstacle[] {
         var pipes: Obstacle[] = [];
         for (let i = 0; i < Const.numPipe;i++){
@@ -157,6 +143,7 @@ export default class PlayScene extends Phaser.Scene {
                 this.pipes[index] = newPipe;
                 this.checkPoint[index] = newPipe.getCheckPoint();
                 this.groupObstacle[index] = newPipe.getObstacleGroup()
+                this.physics.add.overlap(this.bird, this.groupObstacle,()=>this.handleGameOver());
             }
         })
     }
@@ -186,5 +173,24 @@ export default class PlayScene extends Phaser.Scene {
             this.audioPoint.play();
         }
         this.addScore = obj2;
+    }
+
+    private shootBullets(){
+        if(this.bird.getAlive()){
+            var bullet = this.physics.add.image(this.bird.x,this.bird.y, TextureKeys.Bullet);
+            const body = bullet.body as Phaser.Physics.Arcade.Body;
+            body.setVelocityX(1200);
+            body.setGravityY(980);   
+            // var ratio = (this.input.mousePointer.y - this.bird.y) / (this.input.mousePointer.x - this.bird.x);
+            // body.setVelocity(300,ratio*300);
+            this.physics.add.overlap(bullet, this.virus,(obj1,obj2) => {
+                obj2.destroy();
+                obj1.destroy();
+                this.audioHit.play()
+            });
+            this.physics.add.overlap(bullet, this.groupObstacle,(obj1,obj2) => {
+                obj1.destroy();
+            });
+        }
     }
 }

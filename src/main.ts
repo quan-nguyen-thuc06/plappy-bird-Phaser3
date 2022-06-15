@@ -1,4 +1,5 @@
 import Phaser from 'phaser'
+import Const from './consts/Const'
 
 import PlayScene from './scenes/Game'
 import GameOver from './scenes/GameOver'
@@ -7,13 +8,13 @@ import ProgressBar from './scenes/ProgressBar'
 import Start from './scenes/Start'
 const config: Phaser.Types.Core.GameConfig = {
 	type: Phaser.AUTO,
-	width: 800,
-	height: 600,
+	width: Const.scene.width,
+	height: Const.scene.height ,
 	physics: {
 		default: 'arcade',
 		arcade: {
 			gravity: { y: 0 },
-			// debug: true  
+			// debug: true
 		}
 	},
 	scene: [ Preloader,Start,PlayScene,GameOver, ProgressBar]
