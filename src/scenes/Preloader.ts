@@ -48,6 +48,10 @@ export default class Preloader extends Phaser.Scene{
             TextureKeys.Bullet,
             'Images/bullet.png'
         )
+        this.load.image(
+            TextureKeys.Virus,
+            'Images/virus.png'
+        )
         this.load.atlas(
             TextureKeys.Bird,
             'Images/character.png',
@@ -98,6 +102,6 @@ export default class Preloader extends Phaser.Scene{
             frameRate: 20,
             repeat: -1 // -1 to loop forever
         })
-        this.scene.start(SceneKeys.StartGame); 
+        this.scene.start(SceneKeys.Game); 
     }
 }

@@ -7,5 +7,6 @@ enum TextureKeys{
     ReplayButton = 'replay-button',
     GameOver = 'game-over',
     Bullet = 'bullet',
+    Virus = 'virus',
 }
 export default TextureKeys;

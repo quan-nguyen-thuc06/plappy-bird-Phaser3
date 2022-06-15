@@ -3,7 +3,7 @@ var Const = {
     distance: 300,
     pipeWidth: 50,
     pipeHeight: 350,
-    blank: 150, 
+    blank: 200, 
     numPipe : 3,
     birdWidth: 50,
     birdHeight: 50,

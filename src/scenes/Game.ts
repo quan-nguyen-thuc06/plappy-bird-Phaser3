@@ -25,6 +25,9 @@ export default class PlayScene extends Phaser.Scene {
     private audioDie!: Phaser.Sound.BaseSound;
     private audioBackground!: Phaser.Sound.BaseSound;
     private checkPlayAudioHit!: boolean
+    private virus!: Phaser.GameObjects.Image;
+    private timerEvents!: Phaser.Time.TimerEvent;
+
     constructor(){
         super(SceneKeys.Game);
         this.addScore = null;
@@ -45,6 +48,7 @@ export default class PlayScene extends Phaser.Scene {
         this.checkPoint = [];
         this.speed = Const.speed;
         this.checkPlayAudioHit = false;
+        this.timerEvents = this.time.addEvent({ delay: 5000, loop: false });
         // store the width and height of the game screen
         const { width, height } = this.scale
 
@@ -61,8 +65,6 @@ export default class PlayScene extends Phaser.Scene {
         const bodyBird = this.bird.body as Phaser.Physics.Arcade.Body;
         bodyBird.setCollideWorldBounds(true);
         
-        this.physics.add.overlap(this.bird, this.groupObstacle,()=>this.handleGameOver());
-        this.physics.add.overlap(this.bird, this.checkPoint,(obj1,obj2) =>this.handleAddScore(obj1,obj2));
         this.cameras.main.setBounds(0, 0, Number.MAX_SAFE_INTEGER, height);
         
         this.initScore();
@@ -71,32 +73,52 @@ export default class PlayScene extends Phaser.Scene {
             0,0, // x, y
             Number.MAX_SAFE_INTEGER, height-100 // width, height
         )
-
-        this.audioBackground.play()
+        this.virus = this.physics.add.image(
+            Phaser.Math.Between(width, width *1.5), 
+            height*0.5, TextureKeys.Virus)
+            .setDisplaySize(100,100);
+        this.audioBackground.play() 
         this.input.on('pointerdown',()=>{
             if(this.bird.getAlive()){
                 var bullet = this.physics.add.image(this.bird.x,this.bird.y, TextureKeys.Bullet);
                 const body = bullet.body as Phaser.Physics.Arcade.Body;
                 body.setVelocityX(1000);
                 body.setGravityY(980);
-                this.physics.add.overlap(bullet, this.groupObstacle,(obj1,obj2) => {
+                this.physics.add.overlap(bullet, this.virus,(obj1,obj2) => {
                     obj2.destroy();
+                    console.log(this.virus); 
+                    obj1.destroy();
+                    this.audioHit.play()
+                });
+                this.physics.add.overlap(bullet, this.groupObstacle,(obj1,obj2) => {
                     obj1.destroy();
                     this.audioHit.play()
                 });
             }
         })
+        this.physics.add.overlap(this.bird, this.groupObstacle,()=>this.handleGameOver());
+        this.physics.add.overlap(this.bird, this.virus,()=>this.handleGameOver());
+        this.physics.add.overlap(this.bird, this.checkPoint,(obj1,obj2) =>this.handleAddScore(obj1,obj2)); 
     }
     update(time: number, delta: number): void {
-        const height = this.scale.height
+        const { width, height } = this.scale
         this.background.tilePositionX += this.speed;
-        this.ground.tilePositionX += this.speed;  
+        this.ground.tilePositionX += this.speed;
+        this.virus.x -= this.speed;  
         for (let i = 0; i <Const.numPipe;i++){
             this.pipes[i].x -= this.speed;
         } 
         if(this.bird.y >= height-100-50){
             this.handleGameOver()
-        } 
+        }  
+        if(this.virus.visible == false || this.virus.x <= -100) {
+            this.virus = this.physics.add.image(
+                Phaser.Math.Between(width, width *1.5), 
+                Phaser.Math.Between(height*0.1, height *0.8), 
+                TextureKeys.Virus)
+                .setDisplaySize(100,100)
+                .setDepth(1);
+        };
         this.wrapObstacle(); 
     }
 
@@ -139,7 +161,7 @@ export default class PlayScene extends Phaser.Scene {
         })
     }
     private handleGameOver(){
-        console.log("Overlapping") 
+        // console.log("Overlapping") 
         this.audioBackground.pause()
         this.speed = 0;
         this.bird.setAlive(false);

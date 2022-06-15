@@ -26,12 +26,12 @@ export default class Bird extends Phaser.GameObjects.Container{
         const body = this.body as Phaser.Physics.Arcade.Body
         body.setSize(Const.birdWidth,Const.birdHeight)
         body.setOffset(-Const.birdWidth*0.5,-Const.birdHeight*0.5)
-        body.setGravityY(980);
+        body.setGravityY(800);
         this.scene.input.keyboard.on("keydown-SPACE",()=>this.birdMoveMent())  
     }
     preUpdate(): void {     
         const body = this.body as Phaser.Physics.Arcade.Body
-        if(body.velocity.y >= 0){
+        if(body.velocity.y >= 0){ 
             this.bird.anims.isPlaying = false;
             this.bird.angle +=1;   
             if(this.bird.angle>60)  this.bird.angle = 60; 
@@ -50,7 +50,7 @@ export default class Bird extends Phaser.GameObjects.Container{
     private birdMoveMent(){
         const body = this.body as Phaser.Physics.Arcade.Body
         if(this.isAlive){
-            body.setVelocityY(-500);
+            body.setVelocityY(-350);
             this.audioFly.play()
         }
     }
