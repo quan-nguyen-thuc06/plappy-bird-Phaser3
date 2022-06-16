@@ -18,6 +18,7 @@ export default class Bird extends Phaser.GameObjects.Container{
             .play(AnimationKeys.BirdFly)
         this.bird.displayHeight = Const.birdWidth;
         this.bird.displayWidth = Const.birdHeight;
+        // var body = this.bird.body as Phaser.Physics.Arcade.Body;
         this.add(this.bird);
         
         //add a physics body
@@ -27,6 +28,7 @@ export default class Bird extends Phaser.GameObjects.Container{
         body.setSize(Const.birdWidth,Const.birdHeight)
         body.setOffset(-Const.birdWidth*0.5,-Const.birdHeight*0.5)
         body.setGravityY(800);
+        body.setCircle(25)
         this.scene.input.keyboard.on("keydown-SPACE",()=>this.birdMoveMent())  
     }
     preUpdate(): void {     

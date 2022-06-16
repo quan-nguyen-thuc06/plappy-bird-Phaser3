@@ -10,24 +10,25 @@ import AudioKeys from '~/consts/AudioKeys';
 export default class PlayScene extends Phaser.Scene {
     private background!: Phaser.GameObjects.TileSprite;
     private ground!: Phaser.GameObjects.TileSprite;
-    private pipes!: Obstacle[];
-    private groupObstacle!: Phaser.Physics.Arcade.Group[];
-    private checkPoint!: Phaser.GameObjects.Image[];
+    private obstacles!: Phaser.GameObjects.Group;
+    private groupVirus!: Phaser.GameObjects.Group;
+    private checkPoints!: Phaser.GameObjects.Group;
+    private scoreLabel!: Phaser.GameObjects.Text;
+    private virus!: Phaser.GameObjects.Image;
+    private panelGameOver!: PanelGameOver;
     private bird!: Bird;
     private score = 0; 
     private heightScore = 0;
-    private scoreLabel!: Phaser.GameObjects.Text;
-    private addScore: Phaser.GameObjects.GameObject|null;
-    private panelGameOver!: PanelGameOver;
     private speed!: number;
+    private angle!: number
+    private addScore: Phaser.GameObjects.GameObject|null;
+    private checkPlayAudioHit!: boolean
+    private checkExplode !: boolean;
+    private timerEvents!: Phaser.Time.TimerEvent;
     private audioPoint!: Phaser.Sound.BaseSound;
     private audioHit!: Phaser.Sound.BaseSound;
     private audioDie!: Phaser.Sound.BaseSound;
     private audioBackground!: Phaser.Sound.BaseSound;
-    private checkPlayAudioHit!: boolean
-    private virus!: Phaser.GameObjects.Image;
-    private timerEvents!: Phaser.Time.TimerEvent;
-
     constructor(){
         super(SceneKeys.Game);
         this.addScore = null;
@@ -40,62 +41,83 @@ export default class PlayScene extends Phaser.Scene {
         this.audioHit = this.sound.add(AudioKeys.Hit);
         this.audioDie = this.sound.add(AudioKeys.Die);
         this.audioBackground = this.sound.add(AudioKeys.Background);
-       
+        this.checkPoints = this.physics.add.group();
+        this.obstacles = this.physics.add.group();
+        this.groupVirus = this.physics.add.group();
     }
     create(){
-        this.pipes = [];
-        this.groupObstacle = [];
-        this.checkPoint = [];
+        this.checkExplode = false;
         this.speed = Const.speed;
         this.checkPlayAudioHit = false;
-        this.timerEvents = this.time.addEvent({ delay: 7000 , loop: true });
-        // store the width and height of the game screen
-        const { width, height } = this.scale
 
-        this.background = this.add.tileSprite(0, 0, width, height, TextureKeys.Background)
+        // play audioBackground
+        this.audioBackground.play();
+
+        // init 
+        this.initListPipe();
+        this.initScore();
+        this.virus = this.initVirus();
+        this.groupVirus = this.initGroupVirus();
+
+        // init timer
+        this.timerEvents = this.time.addEvent({ delay: 4500 , loop: true });
+
+        // init Background
+        this.background = this.add.tileSprite(0, 0, Const.scene.width, Const.scene.height, TextureKeys.Background)
             .setOrigin(0)
-    
-        this.pipes = this.initListPipe(width);
-        this.ground =  this.add.tileSprite(0, 500, width, height, TextureKeys.Ground)
+        this.ground =  this.add.tileSprite(0, 500, Const.scene.width, Const.scene.height, TextureKeys.Ground)
             .setOrigin(0)
             .setDepth(2)
-        this.bird = new Bird(this, width *0.25, height * 0.25).setDepth(1);
+        
+        // init bird
+        this.bird = new Bird(this, Const.scene.width *0.25, Const.scene.height * 0.25)
+            .setDepth(1);
         this.bird.setAlive(true);
         this.add.existing(this.bird);
         const bodyBird = this.bird.body as Phaser.Physics.Arcade.Body;
         bodyBird.setCollideWorldBounds(true);
         
-        this.cameras.main.setBounds(0, 0, Number.MAX_SAFE_INTEGER, height);
-        
-        this.initScore();
+        this.input.on('pointermove', (pointer) =>{
+            this.angle = Phaser.Math.Angle.BetweenPoints(this.bird, pointer);
+        });
 
+        this.input.on('pointerdown',()=>this.shootBullets())
+
+        // listen for overlapping objects
+        this.physics.add.collider(this.bird, this.obstacles,()=>this.handleGameOver());
+        this.physics.add.overlap (this.bird, this.groupVirus,()=>this.handleGameOver());
+        this.physics.add.overlap(this.bird, this.virus,()=>this.handleGameOver());
+        this.physics.add.overlap(this.bird, this.checkPoints,(obj1,obj2) =>this.handleAddScore(obj1,obj2)); 
+        
         this.physics.world.setBounds(
             0,0, // x, y
-            Number.MAX_SAFE_INTEGER, height-100 // width, height
+            Number.MAX_SAFE_INTEGER, Const.scene.height-100 // width, height
         )
-        this.virus = this.initVirus();
-        this.audioBackground.play() 
-        this.input.on('pointerdown',()=>this.shootBullets())
-        this.physics.add.overlap(this.bird, this.groupObstacle,()=>this.handleGameOver());
-        this.physics.add.overlap(this.bird, this.virus,()=>this.handleGameOver());
-        this.physics.add.overlap(this.bird, this.checkPoint,(obj1,obj2) =>this.handleAddScore(obj1,obj2)); 
+        this.cameras.main.setBounds(0, 0, Number.MAX_SAFE_INTEGER, Const.scene.height);
     }
     update(time: number, delta: number): void {
         this.background.tilePositionX += this.speed;
         this.ground.tilePositionX += this.speed;
         this.virus.x -= this.speed;  
-        for (let i = 0; i <Const.numPipe;i++){
-            this.pipes[i].x -= this.speed;
-        } 
+        Phaser.Actions.IncX(this.obstacles.getChildren(), -this.speed)
+        Phaser.Actions.IncX(this.checkPoints.getChildren(), -this.speed)
         if(this.bird.y >= Const.scene.height-100-50){
             this.handleGameOver()
         }  
-        if(this.virus.visible == false || this.virus.x <= 20) {
+        if(this.virus.visible == false || this.virus.x <= -100) {
+            this.checkExplode = false;
             this.virus.destroy();
             this.virus = this.initVirus();
+            Phaser.Actions.SetX(this.groupVirus.getChildren(), this.virus.x);
+            Phaser.Actions.SetY(this.groupVirus.getChildren(), this.virus.y);
             this.physics.add.overlap(this.bird, this.virus,()=>this.handleGameOver());
+        }
+        if(this.checkExplode){
+            Phaser.Actions.SetX(this.groupVirus.getChildren(), this.virus.x);
+            Phaser.Actions.SetY(this.groupVirus.getChildren(), this.virus.y);
         };
         this.virus.setDisplaySize(this.timerEvents.getProgress()*300,this.timerEvents.getProgress()*300 );
+        this.virusLifeCycle()
         this.wrapObstacle(); 
     }
 
@@ -112,43 +134,83 @@ export default class PlayScene extends Phaser.Scene {
     private initVirus(){
         var virus = this.physics.add.image(
             Phaser.Math.Between(Const.scene.width, Const.scene.width *1.1), 
-            Phaser.Math.Between(Const.scene.height*0.1, Const.scene.height *0.8), 
+            Phaser.Math.Between(Const.scene.height*0.1, Const.scene.height *0.7), 
             TextureKeys.Virus)
             .setDepth(1)
             .setTint(0x0000ff, 0xff0000, 0xff00ff, 0xffff00)
         virus.body.setCircle(190);
-        return virus;
+        return virus; 
     }
-    private initListPipe(width: number): Obstacle[] {
-        var pipes: Obstacle[] = [];
-        for (let i = 0; i < Const.numPipe;i++){
-            let x = i*Const.distance + Const.pipeWidth + width *0.75 ;
-            let y = Phaser.Math.Between(250 ,450)
-            let pipe = new Obstacle(this,x,y);
-            this.add.existing(pipe);
-            pipes.push(pipe) 
-            this.checkPoint.push(pipe.getCheckPoint())
-            this.groupObstacle.push(pipe.getObstacleGroup())
+    private initGroupVirus(){
+        var groupVirus = this.physics.add.group();
+        for(var i=0;i<5;i++){
+            var virus = this.physics.add.image(
+                this.virus.x, 
+                this.virus.y, 
+                TextureKeys.Virus)
+                .setDepth(1)
+                .setTint(0x0000ff, 0xff0000, 0xff00ff, 0xffff00)
+                .setDisplaySize(50,50)
+                .setGravityY(980)
+                .setOrigin(0)
+            virus.body.setCircle(190);
+            groupVirus.add(virus);
         }
-        return pipes;
+        return groupVirus;
+    }
+    private initListPipe(){
+        // var pipes: Obstacle[] = [];
+        for (let i = 0; i < Const.numPipe;i++){
+            let x = i*Const.distance + Const.pipeWidth + Const.scene.width *0.75 ;
+            let y = Phaser.Math.Between(250 ,450) 
+            var bottom = this.obstacles.create(x,y,TextureKeys.Pipe)
+                .setDepth(1)
+                .setOrigin(0)
+            bottom.body.setImmovable()
+            this.add.existing(bottom)
+            var top = this.obstacles.create(x,bottom.y - Const.blank - bottom.displayHeight,TextureKeys.Pipe)
+                .setDepth(1)
+                .setOrigin(0)
+            top.setFlipY(true)
+            top.body.setImmovable()
+            this.checkPoints.create(x + bottom.displayWidth,0, TextureKeys.Pipe)
+                .setOrigin(0,0)
+                .setVisible(false)
+                .setDisplaySize(10,bottom.displayHeight*2 + Const.blank)
+        }
+    }
+
+    private virusLifeCycle(){
+        if(this.timerEvents.getProgress() >0.8 && this.virus.visible == true){
+            if(!this.checkExplode){
+                this.groupVirus.getChildren().forEach(virus => {
+                    var body = virus.body as Phaser.Physics.Arcade.Body;
+                    this.physics.velocityFromRotation(Phaser.Math.Between(-Math.PI,Math.PI), 600, body.velocity);
+                })
+            }
+            this.checkExplode = true;
+        }else{
+            this.checkExplode = false;
+        }
     }
     private wrapObstacle(){
-        this.pipes.map((pipe,index) => {
-            if(pipe.x < -100){
-                var preIndex = index -1;
-                if(preIndex<0) preIndex = this.pipes.length -1;
-                pipe.x = this.pipes[preIndex].x + Const.distance;
-                let newPipe = new Obstacle(this,pipe.x,pipe.y).setDepth(0);
-                this.add.existing(newPipe);
-                this.pipes[index] = newPipe;
-                this.checkPoint[index] = newPipe.getCheckPoint();
-                this.groupObstacle[index] = newPipe.getObstacleGroup()
-                this.physics.add.overlap(this.bird, this.groupObstacle,()=>this.handleGameOver());
+        this.obstacles.getChildren().map((pipe,index) => {
+            if(index%2 ===0){
+                var pipeDownBody = pipe.body as Phaser.Physics.Arcade.Body;
+                if(pipeDownBody.x < -100){
+                    var preIndex = index -1;
+                    if(preIndex<0) preIndex = this.obstacles.getChildren().length -1;
+                    var prePipeBody = this.obstacles.getChildren()[preIndex].body as Phaser.Physics.Arcade.Body;
+                    var pipeUpBody = this.obstacles.getChildren()[index+1].body as Phaser.Physics.Arcade.Body;
+                    var checkPoist = this.checkPoints.getChildren()[index/2].body as Phaser.Physics.Arcade.Body;
+                    pipeDownBody.x =  prePipeBody.x + Const.distance;
+                    pipeUpBody.x =  prePipeBody.x + Const.distance;
+                    checkPoist.x = pipeDownBody.x + Const.pipeWidth;
+                }
             }
         })
     }
     private handleGameOver(){
-        // console.log("Overlapping") 
         this.audioBackground.pause()
         this.speed = 0;
         this.bird.setAlive(false);
@@ -160,8 +222,9 @@ export default class PlayScene extends Phaser.Scene {
             setTimeout(() =>{
                 this.panelGameOver.set_Active(true);
                 this.audioDie.play();
-            }, 500);
+            }, 300);
         }
+        // obj2.set 
         this.checkPlayAudioHit = true;
         
     }
@@ -179,16 +242,13 @@ export default class PlayScene extends Phaser.Scene {
         if(this.bird.getAlive()){
             var bullet = this.physics.add.image(this.bird.x,this.bird.y, TextureKeys.Bullet);
             const body = bullet.body as Phaser.Physics.Arcade.Body;
-            body.setVelocityX(1200);
-            body.setGravityY(980);   
-            // var ratio = (this.input.mousePointer.y - this.bird.y) / (this.input.mousePointer.x - this.bird.x);
-            // body.setVelocity(300,ratio*300);
+            this.physics.velocityFromRotation(this.angle, 600, body.velocity); 
             this.physics.add.overlap(bullet, this.virus,(obj1,obj2) => {
                 obj2.destroy();
                 obj1.destroy();
                 this.audioHit.play()
             });
-            this.physics.add.overlap(bullet, this.groupObstacle,(obj1,obj2) => {
+            this.physics.add.overlap(bullet, this.obstacles,(obj1,obj2) => {
                 obj1.destroy();
             });
         }

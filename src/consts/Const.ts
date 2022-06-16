@@ -1,10 +1,10 @@
 var Const = {
     speed: 1,
-    distance: 300,
+    distance: 250 ,
     pipeWidth: 50,
     pipeHeight: 350,
     blank: 200, 
-    numPipe : 3,
+    numPipe : 4,
     birdWidth: 50,
     birdHeight: 50,
     scene:{
