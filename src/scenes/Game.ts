@@ -136,14 +136,14 @@ export default class PlayScene extends Phaser.Scene {
             Phaser.Math.Between(Const.scene.width, Const.scene.width *1.1), 
             Phaser.Math.Between(Const.scene.height*0.1, Const.scene.height *0.7), 
             TextureKeys.Virus)
-            .setDepth(1)
-            .setTint(0x0000ff, 0xff0000, 0xff00ff, 0xffff00)
+            .setDepth(2)
+            // .setTint(0xE6D1D1, 0xff0000, 0xff00ff, 0xffff00)
         virus.body.setCircle(190);
         return virus; 
     }
     private initGroupVirus(){
         var groupVirus = this.physics.add.group();
-        for(var i=0;i<5;i++){
+        for(var i=0;i<6;i++){
             var virus = this.physics.add.image(
                 this.virus.x, 
                 this.virus.y, 
@@ -220,11 +220,10 @@ export default class PlayScene extends Phaser.Scene {
                 this.heightScore = this.score
             this.panelGameOver.setScore(this.score,this.heightScore);
             setTimeout(() =>{
-                this.panelGameOver.set_Active(true);
                 this.audioDie.play();
             }, 300);
         }
-        // obj2.set 
+        this.panelGameOver.set_Active(true);
         this.checkPlayAudioHit = true;
         
     }
@@ -242,8 +241,14 @@ export default class PlayScene extends Phaser.Scene {
         if(this.bird.getAlive()){
             var bullet = this.physics.add.image(this.bird.x,this.bird.y, TextureKeys.Bullet);
             const body = bullet.body as Phaser.Physics.Arcade.Body;
-            this.physics.velocityFromRotation(this.angle, 600, body.velocity); 
+            // this.physics.velocityFromRotation(this.angle, 600, body.velocity);
+            body.setVelocityX(700) 
             this.physics.add.overlap(bullet, this.virus,(obj1,obj2) => {
+                obj2.destroy();
+                obj1.destroy();
+                this.audioHit.play()
+            });
+            this.physics.add.overlap(bullet, this.groupVirus,(obj1,obj2) => {
                 obj2.destroy();
                 obj1.destroy();
                 this.audioHit.play()
