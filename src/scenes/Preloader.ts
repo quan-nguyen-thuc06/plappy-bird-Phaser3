@@ -169,6 +169,6 @@ export default class Preloader extends Phaser.Scene{
             frameRate: 10,
             repeat: -1 // -1 to loop forever
         })
-        this.scene.start(SceneKeys.TestScene); 
+        this.scene.start(SceneKeys.StartGame); 
     }
 }

@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import Const from "~/consts/Const";
 import SceneKeys from "~/consts/SceneKeys";
 import TextureKeys from "~/consts/TextureKeys";
 
@@ -10,22 +11,29 @@ export default class GameOver extends Phaser.GameObjects.Container{
 
     constructor(scene: Phaser.Scene, x: number, y: number){
         super(scene, x, y);
-        const {width, height} = this.scene.scale;
-        this.textGameOver = scene.add.image(width*0.5, height*0.3, TextureKeys.GameOver)
-            .setOrigin(0.5)
-        this.textGameOver.setDepth(3);
-        this.textGameOver.setDisplaySize(this.textGameOver.width *3,this.textGameOver.height *3)
-        this.replayButton = scene.add.image(width*0.5,height *0.6, TextureKeys.ReplayButton);
+        this.initTextGameOver()
+        this.initReplayButton()
+        this.initScore();
+        this.set_Active(false);
+    }
+
+    private initReplayButton(){
+        this.replayButton = this.scene.add.image(Const.scene.width*0.5,Const.scene.height *0.6, TextureKeys.ReplayButton);
         this.replayButton.setDepth(3);
         this.replayButton.setDisplaySize(this.replayButton.width/2,this.replayButton.height/2)
             .setDepth(3)
             .setInteractive()
             .on('pointerdown', () => {
-                scene.scene.stop(SceneKeys.Game); 
-                scene.scene.start(SceneKeys.Game); 
+                this.scene.scene.stop(SceneKeys.Game); 
+                this.scene.scene.start(SceneKeys.Game); 
             } );
-        this.initScore();
-        this.set_Active(false);
+    }
+
+    private initTextGameOver(){
+        this.textGameOver = this.scene.add.image(Const.scene.width*0.5, Const.scene.height*0.3, TextureKeys.GameOver)
+            .setOrigin(0.5)
+        this.textGameOver.setDepth(3);
+        this.textGameOver.setDisplaySize(this.textGameOver.width *3,this.textGameOver.height *3)
     }
 
     private initScore() {

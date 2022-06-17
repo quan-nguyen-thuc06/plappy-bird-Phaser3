@@ -6,14 +6,18 @@ import TextureKeys from "~/consts/TextureKeys";
 
 export default class Bird extends Phaser.GameObjects.Container{
 
-    private bird: Phaser.GameObjects.Sprite
+    private bird!: Phaser.GameObjects.Sprite
     private isAlive!: boolean;
     private audioFly!: Phaser.Sound.BaseSound;
     constructor(scene: Phaser.Scene, x: number, y: number){
         super(scene,x,y);
         this.setAlive(true);
-        this.audioFly = this.scene.sound.add(AudioKeys.Fly);
-        this.bird = scene.add.sprite(0,0, TextureKeys.Bird)
+        this.initBird();
+        this.initInput();
+        this.initAudio();
+    }
+    private initBird(){
+        this.bird = this.scene.add.sprite(0,0, TextureKeys.Bird)
             .setOrigin(0.5,0.5)
             .play(AnimationKeys.BirdFly)
         this.bird.displayHeight = Const.birdWidth;
@@ -21,14 +25,19 @@ export default class Bird extends Phaser.GameObjects.Container{
         this.add(this.bird);
         
         //add a physics body
-        scene.physics.add.existing(this)
+        this.scene.physics.add.existing(this)
         // adjust physics body size and offset
         const body = this.body as Phaser.Physics.Arcade.Body;
         body.setSize(Const.birdWidth,Const.birdHeight)
         body.setOffset(-Const.birdWidth*0.5,-Const.birdHeight*0.5)
         body.setGravityY(800);
         body.setCircle(25)
+    }
+    private initInput(){
         this.scene.input.keyboard.on("keydown-SPACE",()=>this.birdMoveMent()) 
+    }
+    private initAudio(){
+        this.audioFly = this.scene.sound.add(AudioKeys.Fly);
     }
     preUpdate(): void {     
         const body = this.body as Phaser.Physics.Arcade.Body

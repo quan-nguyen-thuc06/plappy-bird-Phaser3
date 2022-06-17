@@ -38,9 +38,7 @@ export default class PlayScene extends Phaser.Scene {
         this.score = 0;
         this.panelGameOver = new PanelGameOver(this,0,0);
         this.add.existing(this.panelGameOver)
-        this.audioPoint = this.sound.add(AudioKeys.Point);
-        this.audioHit = this.sound.add(AudioKeys.Hit);
-        this.audioDie = this.sound.add(AudioKeys.Die);
+        this.initAudio();
         this.audioBackground = this.sound.add(AudioKeys.Background);
         this.audioExplode = this.sound.add(AudioKeys.Explode);
         this.checkPoints = this.physics.add.group();
@@ -51,63 +49,27 @@ export default class PlayScene extends Phaser.Scene {
         this.checkExplode = false;
         this.speed = Const.speed;
         this.checkPlayAudioHit = false;
-
         // play audioBackground
         this.audioBackground.play();
-
         // init 
         this.initListPipe();
         this.initScore();
         this.virus = this.initVirus();
         this.groupVirus = this.initGroupVirus();
-
-        // init timer
-        this.timerEvents = this.time.addEvent({ delay: 4500 , loop: true });
-
-        // init Background
-        this.background = this.add.tileSprite(0, 0, Const.scene.width, Const.scene.height, TextureKeys.Background)
-            .setOrigin(0)
-        this.ground =  this.add.tileSprite(0, 500, Const.scene.width, Const.scene.height, TextureKeys.Ground)
-            .setOrigin(0)
-            .setDepth(2)
-        
-        // init bird
-        this.bird = new Bird(this, Const.scene.width *0.25, Const.scene.height * 0.25)
-            .setDepth(1);
-        this.bird.setAlive(true);
-        this.add.existing(this.bird);
-        const bodyBird = this.bird.body as Phaser.Physics.Arcade.Body;
-        bodyBird.setCollideWorldBounds(true);
-        
-        // this.input.on('pointermove', (pointer) =>{
-        //     this.angle = Phaser.Math.Angle.BetweenPoints(this.bird, pointer);
-        // });
-
-        this.input.keyboard.on("keydown-RIGHT",()=>this.shootBullets())
-        this.input.keyboard.on("keydown-SPACE",()=>{
-            if(this.panelGameOver.active&&this.bird.getAlive()==false){
-                this.scene.stop(SceneKeys.Game); 
-                this.scene.start(SceneKeys.Game); 
-            }
-        })
-        this.input.keyboard.on("keydown-A",()=>{
-                this.scene.pause(SceneKeys.Game);
-                this.audioBackground.pause()
-        })
-
-
+        this.initTimerEvents();
+        this.intiBackground();
+        this.initBird();
+        this.initHandleInput();
         // listen for overlapping objects
-        this.physics.add.collider(this.bird, this.obstacles,()=>this.handleGameOver());
-        this.physics.add.overlap (this.bird, this.groupVirus,()=>this.handleGameOver());
-        this.physics.add.overlap(this.bird, this.virus,()=>this.handleGameOver());
-        this.physics.add.overlap(this.bird, this.checkPoints,(obj1,obj2) =>this.handleAddScore(obj1,obj2)); 
-        
+        this.initHandleCollision();
+
         this.physics.world.setBounds(
             0,0, // x, y
             Number.MAX_SAFE_INTEGER, Const.scene.height-100 // width, height
         )
         this.cameras.main.setBounds(0, 0, Number.MAX_SAFE_INTEGER, Const.scene.height);
     }
+
     update(time: number, delta: number): void {
         this.background.tilePositionX += this.speed;
         this.ground.tilePositionX += this.speed;
@@ -115,16 +77,13 @@ export default class PlayScene extends Phaser.Scene {
         Phaser.Actions.IncX(this.obstacles.getChildren(), -this.speed)
         Phaser.Actions.IncX(this.checkPoints.getChildren(), -this.speed)
         if(this.bird.y >= Const.scene.height-100-50){
-            this.handleGameOver()
+            this.handleGameOver(this.bird,this.bird)
         }  
-        if(this.virus.x <= -150||this.virus.visible === false){
+        if(this.virus.x <= -150){
             this.checkExplode = false;
-            var heSo = 1;
-            if(!this.virus.visible) 
-                heSo = 1.2;
             this.virus.setActive(true).setVisible(true);
             this.virus.setPosition(
-                Phaser.Math.Between(Const.scene.width*heSo, Const.scene.width *1.3), 
+                Phaser.Math.Between(Const.scene.width, Const.scene.width *1.3), 
                 Phaser.Math.Between(Const.scene.height*0.2, Const.scene.height *0.7)
             )
             Phaser.Actions.SetX(this.groupVirus.getChildren(), this.virus.x);
@@ -139,6 +98,53 @@ export default class PlayScene extends Phaser.Scene {
         this.wrapObstacle(); 
     }
 
+    private initTimerEvents(){
+        this.timerEvents = this.time.addEvent({ delay: 4500 , loop: true });
+    }
+    private initAudio(){
+        this.audioPoint = this.sound.add(AudioKeys.Point);
+        this.audioHit = this.sound.add(AudioKeys.Hit);
+        this.audioDie = this.sound.add(AudioKeys.Die);
+    }
+    private initHandleCollision(){
+        this.physics.add.collider(this.bird, this.obstacles,(obj1, obj2)=>this.handleGameOver(obj1, obj2));
+        this.physics.add.overlap (this.bird, this.groupVirus,(obj1, obj2)=>this.handleGameOver(obj1, obj2));
+        this.physics.add.overlap(this.bird, this.virus,(obj1, obj2)=>this.handleGameOver(obj1, obj2));
+        this.physics.add.overlap(this.bird, this.checkPoints,(obj1,obj2) =>this.handleAddScore(obj1,obj2)); 
+    }
+
+    private initHandleInput(){
+        // this.input.on('pointermove', (pointer) =>{
+        //     this.angle = Phaser.Math.Angle.BetweenPoints(this.bird, pointer);
+        // });
+        this.input.keyboard.on("keydown-RIGHT",()=>this.shootBullets())
+        this.input.keyboard.on("keydown-SPACE",()=>{
+            if(this.panelGameOver.active&&this.bird.getAlive()==false){
+                this.scene.stop(SceneKeys.Game); 
+                this.scene.start(SceneKeys.Game); 
+            }
+        })
+        this.input.keyboard.on("keydown-A",()=>{
+                this.scene.pause(SceneKeys.Game);
+                this.audioBackground.pause()
+        })
+    }
+
+    private initBird(){
+        this.bird = new Bird(this, Const.scene.width *0.25, Const.scene.height * 0.25)
+            .setDepth(1);
+        this.bird.setAlive(true);
+        this.add.existing(this.bird);
+        const bodyBird = this.bird.body as Phaser.Physics.Arcade.Body;
+        bodyBird.setCollideWorldBounds(true);
+    }
+    private intiBackground() {
+        this.background = this.add.tileSprite(0, 0, Const.scene.width, Const.scene.height, TextureKeys.Background)
+            .setOrigin(0)
+        this.ground =  this.add.tileSprite(0, 500, Const.scene.width, Const.scene.height, TextureKeys.Ground)
+            .setOrigin(0)
+            .setDepth(2)
+    }
     private initScore(){
         this.scoreLabel = this.add.text(10, 10, "Score: " + this.score  , {
             fontSize: '24px',
@@ -232,22 +238,23 @@ export default class PlayScene extends Phaser.Scene {
             }
         })
     }
-    private handleGameOver(){
-        this.audioBackground.pause()
-        this.speed = 0;
-        this.bird.setAlive(false);
-        if(!this.audioHit.isPlaying&&!this.checkPlayAudioHit){
-            this.audioHit.play();
-            if(this.heightScore<this.score)
-                this.heightScore = this.score
-            this.panelGameOver.setScore(this.score,this.heightScore);
-            setTimeout(() =>{
-                this.audioDie.play();
-            }, 300);
+    private handleGameOver(obj1: Phaser.GameObjects.GameObject, obj2: Phaser.GameObjects.GameObject){
+        if(obj2.active && obj1.active){
+            this.audioBackground.pause()
+            this.speed = 0;
+            this.bird.setAlive(false);
+            if(!this.audioHit.isPlaying&&!this.checkPlayAudioHit){
+                this.audioHit.play();
+                if(this.heightScore<this.score)
+                    this.heightScore = this.score
+                this.panelGameOver.setScore(this.score,this.heightScore);
+                setTimeout(() =>{
+                    this.audioDie.play();
+                }, 300);
+            }
+            this.panelGameOver.set_Active(true);
+            this.checkPlayAudioHit = true;
         }
-        this.panelGameOver.set_Active(true);
-        this.checkPlayAudioHit = true;
-        
     }
     
     private handleAddScore(obj1: Phaser.GameObjects.GameObject, obj2: Phaser.GameObjects.GameObject){
@@ -269,6 +276,8 @@ export default class PlayScene extends Phaser.Scene {
             body.setVelocityX(500) 
             this.physics.add.overlap(bullet, this.virus,(obj1,obj2) => {
                 this.virus.setActive(false).setVisible(false);
+                var body = this.virus.body as Phaser.Physics.Arcade.Body;
+                body.checkCollision.none = false;
                 obj1.destroy();
                 this.audioExplode.play()
                 this.explode(bullet);
