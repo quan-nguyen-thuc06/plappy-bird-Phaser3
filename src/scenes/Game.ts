@@ -2,7 +2,6 @@ import Phaser from 'phaser';
 import SceneKeys from '~/consts/SceneKeys';
 import TextureKeys from '~/consts/TextureKeys';
 import Bird from '~/game/Bird';
-import Obstacle from '~/game/Obstacle';
 import Const from '~/consts/Const';
 import PanelGameOver from '~/game/PanelGameOver';
 import AudioKeys from '~/consts/AudioKeys';
@@ -121,7 +120,8 @@ export default class PlayScene extends Phaser.Scene {
         if(this.virus.x <= -150||this.virus.visible === false){
             this.checkExplode = false;
             var heSo = 1;
-            if(!this.virus.visible) heSo = 1.2;
+            if(!this.virus.visible) 
+                heSo = 1.2;
             this.virus.setActive(true).setVisible(true);
             this.virus.setPosition(
                 Phaser.Math.Between(Const.scene.width*heSo, Const.scene.width *1.3), 
@@ -129,7 +129,6 @@ export default class PlayScene extends Phaser.Scene {
             )
             Phaser.Actions.SetX(this.groupVirus.getChildren(), this.virus.x);
             Phaser.Actions.SetY(this.groupVirus.getChildren(), this.virus.y);
-            // this.physics.add.overlap(this.bird, this.virus,()=>this.handleGameOver());
         }
         if(this.checkExplode){
             Phaser.Actions.SetX(this.groupVirus.getChildren(), this.virus.x);

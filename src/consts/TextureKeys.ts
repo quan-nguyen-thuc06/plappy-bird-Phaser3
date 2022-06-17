@@ -9,5 +9,6 @@ enum TextureKeys{
     Bullet = 'bullet',
     Virus = 'virus',
     Bullet2 = 'bullet-2',
+    Mage = 'mage',
 }
 export default TextureKeys;

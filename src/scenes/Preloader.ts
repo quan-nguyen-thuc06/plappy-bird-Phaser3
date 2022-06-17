@@ -61,7 +61,12 @@ export default class Preloader extends Phaser.Scene{
             TextureKeys.Bullet2,
             'Images/bullet2.png',
             'Images/bullet2.json'
-        )  
+        )
+        this.load.atlas(
+            TextureKeys.Mage,
+            'Images/Mage.png',
+            'Images/Mage.json'
+        )    
         this.load.audio(AudioKeys.Fly,[
             'audio/swoosh.mp3'
         ])
@@ -137,6 +142,33 @@ export default class Preloader extends Phaser.Scene{
             frameRate: 10,
             repeat: 0 // -1 to loop forever
         })
-        this.scene.start(SceneKeys.Game); 
+
+        this.anims.create({
+            key: AnimationKeys.Attack, // name of this animation
+            // helper to generate frames
+            frames: this.anims.generateFrameNames(TextureKeys.Mage, {
+            start: 1,
+            end: 7,
+            prefix: 'attack',
+            zeroPad: 1, // so chu so
+            suffix: '.png'
+            }),
+            frameRate: 6,
+            repeat: -1 // -1 to loop forever
+        })
+        this.anims.create({
+            key: AnimationKeys.Fire, // name of this animation
+            // helper to generate frames
+            frames: this.anims.generateFrameNames(TextureKeys.Mage, {
+            start: 1,
+            end: 4,
+            prefix: 'fire',
+            zeroPad: 1, // so chu so
+            suffix: '.png'
+            }),
+            frameRate: 10,
+            repeat: -1 // -1 to loop forever
+        })
+        this.scene.start(SceneKeys.TestScene); 
     }
 }
