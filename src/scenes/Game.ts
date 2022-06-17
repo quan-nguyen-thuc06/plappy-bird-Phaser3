@@ -99,7 +99,7 @@ export default class PlayScene extends Phaser.Scene {
     }
 
     private initTimerEvents(){
-        this.timerEvents = this.time.addEvent({ delay: 4500 , loop: true });
+        this.timerEvents = this.time.addEvent({ delay: 3500 , loop: true });
     }
     private initAudio(){
         this.audioPoint = this.sound.add(AudioKeys.Point);

@@ -42,12 +42,12 @@ export default class Bird extends Phaser.GameObjects.Container{
     preUpdate(): void {     
         const body = this.body as Phaser.Physics.Arcade.Body
         if(body.velocity.y >= 0){ 
-            this.bird.anims.isPlaying = false;
+            // this.bird.anims.isPlaying = false;
             this.bird.angle +=1;   
             if(this.bird.angle>60)  this.bird.angle = 60; 
         }
         else{
-            this.bird.anims.isPlaying = true;
+            // this.bird.anims.isPlaying = true;
             this.bird.angle -=1;
             if(this.bird.angle<-20)  this.bird.angle = -20; 
         }

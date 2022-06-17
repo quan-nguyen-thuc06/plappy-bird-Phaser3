@@ -1,6 +1,6 @@
 var Const = {
     speed: 0.5,
-    distance: 300,
+    distance: 250,
     pipeWidth: 50,
     pipeHeight: 350,
     blank: 200, 
