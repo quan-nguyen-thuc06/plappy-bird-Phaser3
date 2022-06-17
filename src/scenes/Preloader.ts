@@ -50,13 +50,18 @@ export default class Preloader extends Phaser.Scene{
         )
         this.load.image(
             TextureKeys.Virus,
-            'Images/virus.png'
+            'Images/virus3.png'
         )
         this.load.atlas(
             TextureKeys.Bird,
             'Images/character.png',
             'Images/character.json'
-        ) 
+        )
+        this.load.atlas(
+            TextureKeys.Bullet2,
+            'Images/bullet2.png',
+            'Images/bullet2.json'
+        )  
         this.load.audio(AudioKeys.Fly,[
             'audio/swoosh.mp3'
         ])
@@ -68,6 +73,9 @@ export default class Preloader extends Phaser.Scene{
         ])
         this.load.audio(AudioKeys.Die,[
             'audio/die.mp3'
+        ])
+        this.load.audio(AudioKeys.Explode,[
+            'audio/mixkit-coin.wav'
         ])
         this.load.audio(AudioKeys.Background,[
             'audio/orchestrawav-26158.mp3'
@@ -101,6 +109,33 @@ export default class Preloader extends Phaser.Scene{
             }),
             frameRate: 20,
             repeat: -1 // -1 to loop forever
+        })
+
+        this.anims.create({
+            key: AnimationKeys.Bullet, // name of this animation
+            // helper to generate frames
+            frames: this.anims.generateFrameNames(TextureKeys.Bullet2, {
+            start: 1,
+            end: 4,
+            prefix: 'Bullet_',
+            zeroPad: 3, // so chu so
+            suffix: '.png'
+            }),
+            frameRate: 20,
+            repeat: -1 // -1 to loop forever
+        })
+        this.anims.create({
+            key: AnimationKeys.Explode, // name of this animation
+            // helper to generate frames
+            frames: this.anims.generateFrameNames(TextureKeys.Bullet2, {
+            start: 0,
+            end: 6,
+            prefix: 'klipartz-',
+            zeroPad: 1, // so chu so
+            suffix: '.png'
+            }),
+            frameRate: 10,
+            repeat: 0 // -1 to loop forever
         })
         this.scene.start(SceneKeys.Game); 
     }

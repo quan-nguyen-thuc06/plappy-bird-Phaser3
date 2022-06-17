@@ -4,5 +4,6 @@ enum AudioKeys{
     Hit = 'hit',
     Die = 'die',
     Background = 'background',
+    Explode = 'explode',
 }
 export default AudioKeys;

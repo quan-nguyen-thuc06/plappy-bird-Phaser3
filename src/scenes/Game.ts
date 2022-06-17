@@ -6,6 +6,7 @@ import Obstacle from '~/game/Obstacle';
 import Const from '~/consts/Const';
 import PanelGameOver from '~/game/PanelGameOver';
 import AudioKeys from '~/consts/AudioKeys';
+import AnimationKeys from '~/consts/AnimationKeys';
 
 export default class PlayScene extends Phaser.Scene {
     private background!: Phaser.GameObjects.TileSprite;
@@ -20,7 +21,7 @@ export default class PlayScene extends Phaser.Scene {
     private score = 0; 
     private heightScore = 0;
     private speed!: number;
-    private angle!: number
+    // private angle!: number
     private addScore: Phaser.GameObjects.GameObject|null;
     private checkPlayAudioHit!: boolean
     private checkExplode !: boolean;
@@ -28,6 +29,7 @@ export default class PlayScene extends Phaser.Scene {
     private audioPoint!: Phaser.Sound.BaseSound;
     private audioHit!: Phaser.Sound.BaseSound;
     private audioDie!: Phaser.Sound.BaseSound;
+    private audioExplode!: Phaser.Sound.BaseSound;
     private audioBackground!: Phaser.Sound.BaseSound;
     constructor(){
         super(SceneKeys.Game);
@@ -41,6 +43,7 @@ export default class PlayScene extends Phaser.Scene {
         this.audioHit = this.sound.add(AudioKeys.Hit);
         this.audioDie = this.sound.add(AudioKeys.Die);
         this.audioBackground = this.sound.add(AudioKeys.Background);
+        this.audioExplode = this.sound.add(AudioKeys.Explode);
         this.checkPoints = this.physics.add.group();
         this.obstacles = this.physics.add.group();
         this.groupVirus = this.physics.add.group();
@@ -77,11 +80,22 @@ export default class PlayScene extends Phaser.Scene {
         const bodyBird = this.bird.body as Phaser.Physics.Arcade.Body;
         bodyBird.setCollideWorldBounds(true);
         
-        this.input.on('pointermove', (pointer) =>{
-            this.angle = Phaser.Math.Angle.BetweenPoints(this.bird, pointer);
-        });
+        // this.input.on('pointermove', (pointer) =>{
+        //     this.angle = Phaser.Math.Angle.BetweenPoints(this.bird, pointer);
+        // });
 
-        this.input.on('pointerdown',()=>this.shootBullets())
+        this.input.keyboard.on("keydown-RIGHT",()=>this.shootBullets())
+        this.input.keyboard.on("keydown-SPACE",()=>{
+            if(this.panelGameOver.active&&this.bird.getAlive()==false){
+                this.scene.stop(SceneKeys.Game); 
+                this.scene.start(SceneKeys.Game); 
+            }
+        })
+        this.input.keyboard.on("keydown-A",()=>{
+                this.scene.pause(SceneKeys.Game);
+                this.audioBackground.pause()
+        })
+
 
         // listen for overlapping objects
         this.physics.add.collider(this.bird, this.obstacles,()=>this.handleGameOver());
@@ -104,13 +118,18 @@ export default class PlayScene extends Phaser.Scene {
         if(this.bird.y >= Const.scene.height-100-50){
             this.handleGameOver()
         }  
-        if(this.virus.visible == false || this.virus.x <= -100) {
+        if(this.virus.x <= -150||this.virus.visible === false){
             this.checkExplode = false;
-            this.virus.destroy();
-            this.virus = this.initVirus();
+            var heSo = 1;
+            if(!this.virus.visible) heSo = 1.2;
+            this.virus.setActive(true).setVisible(true);
+            this.virus.setPosition(
+                Phaser.Math.Between(Const.scene.width*heSo, Const.scene.width *1.3), 
+                Phaser.Math.Between(Const.scene.height*0.2, Const.scene.height *0.7)
+            )
             Phaser.Actions.SetX(this.groupVirus.getChildren(), this.virus.x);
             Phaser.Actions.SetY(this.groupVirus.getChildren(), this.virus.y);
-            this.physics.add.overlap(this.bird, this.virus,()=>this.handleGameOver());
+            // this.physics.add.overlap(this.bird, this.virus,()=>this.handleGameOver());
         }
         if(this.checkExplode){
             Phaser.Actions.SetX(this.groupVirus.getChildren(), this.virus.x);
@@ -129,21 +148,21 @@ export default class PlayScene extends Phaser.Scene {
             shadow: { fill: true, blur: 0, offsetY: 0 },
              padding: { left: 15, right: 15, top: 10, bottom: 10 }
             })
-            .setDepth(1);
+            .setDepth(2);
     }
     private initVirus(){
         var virus = this.physics.add.image(
-            Phaser.Math.Between(Const.scene.width, Const.scene.width *1.1), 
-            Phaser.Math.Between(Const.scene.height*0.1, Const.scene.height *0.7), 
+            Phaser.Math.Between(Const.scene.width, Const.scene.width *1.3), 
+            Phaser.Math.Between(Const.scene.height*0.2, Const.scene.height *0.7), 
             TextureKeys.Virus)
             .setDepth(2)
-            // .setTint(0xE6D1D1, 0xff0000, 0xff00ff, 0xffff00)
-        virus.body.setCircle(190);
+            .setTint(0x1CF8E4, 0xff0000, 0xff00ff, 0xffff00)
+        virus.body.setCircle(200);
         return virus; 
     }
     private initGroupVirus(){
         var groupVirus = this.physics.add.group();
-        for(var i=0;i<6;i++){
+        for(var i=0;i<10;i++){
             var virus = this.physics.add.image(
                 this.virus.x, 
                 this.virus.y, 
@@ -151,13 +170,28 @@ export default class PlayScene extends Phaser.Scene {
                 .setDepth(1)
                 .setTint(0x0000ff, 0xff0000, 0xff00ff, 0xffff00)
                 .setDisplaySize(50,50)
-                .setGravityY(980)
+                // .setGravityY(980)
                 .setOrigin(0)
-            virus.body.setCircle(190);
+            virus.body.setCircle(200);
             groupVirus.add(virus);
         }
         return groupVirus;
     }
+
+    private virusLifeCycle(){
+        if(this.timerEvents.getProgress() >0.8 && this.virus.visible == true){
+            if(!this.checkExplode){
+                this.groupVirus.getChildren().forEach(virus => {
+                    var body = virus.body as Phaser.Physics.Arcade.Body;
+                    this.physics.velocityFromRotation(Phaser.Math.Between(-Math.PI,Math.PI), 300, body.velocity);
+                })
+            }
+            this.checkExplode = true;
+        }else{
+            this.checkExplode = false;
+        }
+    }
+
     private initListPipe(){
         // var pipes: Obstacle[] = [];
         for (let i = 0; i < Const.numPipe;i++){
@@ -166,11 +200,13 @@ export default class PlayScene extends Phaser.Scene {
             var bottom = this.obstacles.create(x,y,TextureKeys.Pipe)
                 .setDepth(1)
                 .setOrigin(0)
+                .setDisplaySize(Const.pipeWidth, Const.pipeHeight)
             bottom.body.setImmovable()
             this.add.existing(bottom)
             var top = this.obstacles.create(x,bottom.y - Const.blank - bottom.displayHeight,TextureKeys.Pipe)
                 .setDepth(1)
                 .setOrigin(0)
+                .setDisplaySize(Const.pipeWidth, Const.pipeHeight)
             top.setFlipY(true)
             top.body.setImmovable()
             this.checkPoints.create(x + bottom.displayWidth,0, TextureKeys.Pipe)
@@ -180,19 +216,6 @@ export default class PlayScene extends Phaser.Scene {
         }
     }
 
-    private virusLifeCycle(){
-        if(this.timerEvents.getProgress() >0.8 && this.virus.visible == true){
-            if(!this.checkExplode){
-                this.groupVirus.getChildren().forEach(virus => {
-                    var body = virus.body as Phaser.Physics.Arcade.Body;
-                    this.physics.velocityFromRotation(Phaser.Math.Between(-Math.PI,Math.PI), 600, body.velocity);
-                })
-            }
-            this.checkExplode = true;
-        }else{
-            this.checkExplode = false;
-        }
-    }
     private wrapObstacle(){
         this.obstacles.getChildren().map((pipe,index) => {
             if(index%2 ===0){
@@ -239,23 +262,38 @@ export default class PlayScene extends Phaser.Scene {
 
     private shootBullets(){
         if(this.bird.getAlive()){
-            var bullet = this.physics.add.image(this.bird.x,this.bird.y, TextureKeys.Bullet);
+            var bullet = this.physics.add.sprite(this.bird.x,this.bird.y, TextureKeys.Bullet2)
+                .setDisplaySize(50,30)
+                .play(AnimationKeys.Bullet);
             const body = bullet.body as Phaser.Physics.Arcade.Body;
             // this.physics.velocityFromRotation(this.angle, 600, body.velocity);
-            body.setVelocityX(700) 
+            body.setVelocityX(500) 
             this.physics.add.overlap(bullet, this.virus,(obj1,obj2) => {
-                obj2.destroy();
+                this.virus.setActive(false).setVisible(false);
                 obj1.destroy();
-                this.audioHit.play()
+                this.audioExplode.play()
+                this.explode(bullet);
             });
             this.physics.add.overlap(bullet, this.groupVirus,(obj1,obj2) => {
                 obj2.destroy();
                 obj1.destroy();
-                this.audioHit.play()
+                this.audioExplode.play()
+                this.explode(bullet);
             });
-            this.physics.add.overlap(bullet, this.obstacles,(obj1,obj2) => {
+            this.physics.add.collider(bullet, this.obstacles ,(obj1,obj2) => {
                 obj1.destroy();
+                this.explode(bullet);
+                this.audioExplode.play()
             });
         }
+    }
+
+    private explode(bullet: Phaser.GameObjects.Sprite){
+        var explode = this.physics.add.sprite(bullet.x,bullet.y, TextureKeys.Bullet2)
+            .setDisplaySize(100,100)
+            .setDepth(2)
+            .play(AnimationKeys.Explode).on(Phaser.Animations.Events.ANIMATION_COMPLETE, () =>{
+                explode.destroy()
+            })
     }
 }
