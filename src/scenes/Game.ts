@@ -275,12 +275,14 @@ export default class PlayScene extends Phaser.Scene {
             // this.physics.velocityFromRotation(this.angle, 600, body.velocity);
             body.setVelocityX(500) 
             this.physics.add.overlap(bullet, this.virus,(obj1,obj2) => {
-                this.virus.setActive(false).setVisible(false);
-                var body = this.virus.body as Phaser.Physics.Arcade.Body;
-                body.checkCollision.none = false;
-                obj1.destroy();
-                this.audioExplode.play()
-                this.explode(bullet);
+                if(obj2.active){
+                    this.virus.setActive(false).setVisible(false);
+                    var body = this.virus.body as Phaser.Physics.Arcade.Body;
+                    body.checkCollision.none = false;
+                    obj1.destroy();
+                    this.audioExplode.play()
+                    this.explode(bullet);
+                }
             });
             this.physics.add.overlap(bullet, this.groupVirus,(obj1,obj2) => {
                 obj2.destroy();
