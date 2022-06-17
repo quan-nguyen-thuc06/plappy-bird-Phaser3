@@ -158,7 +158,7 @@ export default class PlayScene extends Phaser.Scene {
     private initVirus(){
         var virus = this.physics.add.image(
             Phaser.Math.Between(Const.scene.width, Const.scene.width *1.3), 
-            Phaser.Math.Between(Const.scene.height*0.2, Const.scene.height *0.7), 
+            Phaser.Math.Between(Const.scene.height*0.2, Const.scene.height *0.9), 
             TextureKeys.Virus)
             .setDepth(2)
             .setTint(0x1CF8E4, 0xff0000, 0xff00ff, 0xffff00)
