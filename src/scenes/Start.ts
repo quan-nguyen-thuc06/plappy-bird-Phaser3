@@ -7,6 +7,7 @@ import Bird from "~/game/Bird";
 export default class Start extends Phaser.Scene{
     private background!: Phaser.GameObjects.TileSprite;
     private ground!: Phaser.GameObjects.TileSprite;
+    private textMessage!: Phaser.GameObjects.Text;
     private bird!: Bird;
     constructor(){
         super(SceneKeys.StartGame);
@@ -14,7 +15,7 @@ export default class Start extends Phaser.Scene{
     create(){
         const {width, height} = this.scale;
         this.initBackGround()
-        const imgMessage = this.add.image(width*0.5, height*0.5, TextureKeys.Message)
+        const imgMessage = this.add.image(width*0.5, height*0.46, TextureKeys.Message)
             .setOrigin(0.5);
         imgMessage.setDisplaySize(imgMessage.width*2, imgMessage.height*2);
         this.initBird();
@@ -26,6 +27,11 @@ export default class Start extends Phaser.Scene{
             .setOrigin(0)
         this.ground = this.add.tileSprite(0, 500, Const.scene.width, Const.scene.height, TextureKeys.Ground)
             .setOrigin(0)
+        this.textMessage = this.add.text(Const.scene.width*0.5, Const.scene.height*0.96,"Press Space to fly and Right to shoot bullet",{
+            fontSize: '24px',
+            color: '#fff',
+        })
+        .setOrigin(0.5)
     }
     
     private initBird(){

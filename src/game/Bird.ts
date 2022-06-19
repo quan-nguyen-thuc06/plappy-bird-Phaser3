@@ -6,9 +6,10 @@ import TextureKeys from "~/consts/TextureKeys";
 
 export default class Bird extends Phaser.GameObjects.Container{
 
-    private bird!: Phaser.GameObjects.Sprite
+    private bird!: Phaser.GameObjects.Sprite;
     private isAlive!: boolean;
     private audioFly!: Phaser.Sound.BaseSound;
+
     constructor(scene: Phaser.Scene, x: number, y: number){
         super(scene,x,y);
         this.setAlive(true);

@@ -5,6 +5,7 @@ import PlayScene from './scenes/Game'
 import GameOver from './scenes/GameOver'
 import Preloader from './scenes/Preloader'
 import Start from './scenes/Start'
+import TestScene from './scenes/TestScene'
 const config: Phaser.Types.Core.GameConfig = {
 	type: Phaser.AUTO,
 	width: Const.scene.width,
@@ -16,7 +17,7 @@ const config: Phaser.Types.Core.GameConfig = {
 			debug: true 
 		}
 	},
-	scene: [ Preloader,Start,PlayScene,GameOver]
+	scene: [ Preloader,Start,PlayScene,GameOver,TestScene]
 }
 
 export default new Phaser.Game(config)
