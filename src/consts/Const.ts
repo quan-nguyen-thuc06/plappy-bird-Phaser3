@@ -3,7 +3,7 @@ var Const = {
     distance: 300,
     pipeWidth: 50,
     pipeHeight: 350,
-    blank: 180, 
+    blank: 160, 
     numPipe : 4,
     birdWidth: 50,
     birdHeight: 50,
@@ -11,7 +11,7 @@ var Const = {
         width: 800,
         height: 600,
     },
-    defaultNumBullets: 4,
+    defaultNumBullets: 3,
 }  
 
 export default Const;

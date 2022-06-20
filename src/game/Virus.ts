@@ -43,7 +43,7 @@ export default class Virus extends Phaser.GameObjects.Container{
 
     private initGroupVirus(){
         this.groupVirus = this.scene.physics.add.group();
-        for(var i=0;i<10;i++){
+        for(var i=0;i<12;i++){
             var virus = this.scene.physics.add.image(
                 this.mainVirus.x, 
                 this.mainVirus.y, 
@@ -58,8 +58,8 @@ export default class Virus extends Phaser.GameObjects.Container{
     }
 
     private virusLifeCycle(){
-        Phaser.Actions.SetXY(this.groupVirus.getChildren(), this.mainVirus.x, this.mainVirus.y)
-        this.groupVirus.getChildren().forEach(virus => {
+        Phaser.Actions.SetXY(this.groupVirus.getChildren(), this.mainVirus.x, this.mainVirus.y);
+        this.groupVirus.getChildren().map(virus => {
             var body = virus.body as Phaser.Physics.Arcade.Body;
             this.scene.physics.velocityFromRotation(Phaser.Math.Between(-Math.PI,Math.PI), 300, body.velocity);
         })
