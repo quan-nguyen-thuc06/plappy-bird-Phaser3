@@ -184,7 +184,6 @@ export default class PlayScene extends Phaser.Scene {
         if(obj2.active && obj1.active){
             this.audioBackground.pause()
             this.speed = 0;
-            // this.virus.setSpeed(0);
             this.bird.setAlive(false);
             if(!this.audioHit.isPlaying&&!this.checkPlayAudioHit){
                 this.audioHit.play();

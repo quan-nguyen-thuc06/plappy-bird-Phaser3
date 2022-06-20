@@ -8,12 +8,13 @@ export default class GameOver extends Phaser.GameObjects.Container{
     private replayButton!: Phaser.GameObjects.Image;
     private currentScore!: Phaser.GameObjects.Text;
     private highScore!: Phaser.GameObjects.Text;
-
+    private textGuide!: Phaser.GameObjects.Text;
     constructor(scene: Phaser.Scene, x: number, y: number){
         super(scene, x, y);
         this.initTextGameOver()
         this.initReplayButton()
         this.initScore();
+        this.initTextGuide();
         this.set_Active(false);
     }
 
@@ -57,7 +58,15 @@ export default class GameOver extends Phaser.GameObjects.Container{
             .setDepth(3);
 
     }
-
+    private initTextGuide(){
+        this.textGuide = this.scene.add.text(Const.scene.width*0.5, Const.scene.height*0.7,"Press Enter to replay",{
+            fontSize: '24px',
+            color: '#fff',
+            fontStyle: 'italic'
+            })
+            .setOrigin(0.5)
+            .setDepth(3)
+    }
     public set_Active(active: boolean){
         this.textGameOver.setActive(active)
             .setVisible(active);
@@ -65,6 +74,7 @@ export default class GameOver extends Phaser.GameObjects.Container{
             .setVisible(active);
         this.currentScore.setVisible(active)
         this.highScore.setVisible(active);
+        this.textGuide.setVisible(active);
     }
 
     public setScore(score: number, highScore: number){
