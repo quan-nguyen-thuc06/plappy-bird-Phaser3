@@ -47,7 +47,7 @@ export default class PlayScene extends Phaser.Scene {
         // play audioBackground
         this.audioBackground.play();
 
-        this.numBullets = 3;
+        this.numBullets = Const.defaultNumBullets;
         this.speed = Const.speed;
         this.checkPlayAudioHit = false;
         // init 
@@ -94,7 +94,7 @@ export default class PlayScene extends Phaser.Scene {
 
     private initHandleInput(){
         this.input.keyboard.on("keydown-RIGHT",()=>this.shootBullets())
-        this.input.keyboard.on("keydown-SPACE",()=>{
+        this.input.keyboard.on("keydown-ENTER",()=>{
             if(this.panelGameOver.active&&this.bird.getAlive()==false){
                 this.scene.stop(SceneKeys.Game); 
                 this.scene.start(SceneKeys.Game); 

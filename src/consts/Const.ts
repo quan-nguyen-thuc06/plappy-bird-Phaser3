@@ -11,6 +11,7 @@ var Const = {
         width: 800,
         height: 600,
     },
+    defaultNumBullets: 3,
 }  
 
 export default Const;
