@@ -4,28 +4,25 @@ import TextureKeys from "~/consts/TextureKeys";
 
 export default class Virus extends Phaser.GameObjects.Container{
     private timerEvents!: Phaser.Time.TimerEvent;
-    virus!: Phaser.GameObjects.Image;
-    groupVirus!: Phaser.GameObjects.Group;
-    private speed!: number;
+    private mainVirus!: Phaser.GameObjects.Image;
+    private groupVirus!: Phaser.GameObjects.Group;
     constructor(scene: Phaser.Scene, x: number, y: number){
         super(scene,x,y);
         this.initVirus();
         this.initGroupVirus();
         this.initTimerEvents();
-        this.setSpeed(Const.speed);
     }
 
     preUpdate() {     
-        this.virus.x -= this.speed;
-        if(this.virus.x <= -200||this.virus.active == false){
-            this.virus.setActive(true).setVisible(true);
-            this.virus.setPosition(
+        if(this.mainVirus.x <= -200||this.mainVirus.active == false){
+            this.mainVirus.setActive(true).setVisible(true);
+            this.mainVirus.setPosition(
                 Phaser.Math.Between(Const.scene.width*1.15, Const.scene.width *1.3), 
                 Phaser.Math.Between(Const.scene.height*0.2, Const.scene.height *0.7)
             )
-            Phaser.Actions.SetXY(this.groupVirus.getChildren(), this.virus.x, this.virus.y);
+            Phaser.Actions.SetXY(this.groupVirus.getChildren(), this.mainVirus.x, this.mainVirus.y);
         }
-        this.virus.setDisplaySize(this.timerEvents.getProgress()*300,this.timerEvents.getProgress()*300 );
+        this.mainVirus.setDisplaySize(this.timerEvents.getProgress()*300,this.timerEvents.getProgress()*300 );
     }
 
     private initTimerEvents(){
@@ -33,23 +30,23 @@ export default class Virus extends Phaser.GameObjects.Container{
     }
 
     private initVirus(){
-        this.virus = this.scene.physics.add.image(
+        this.mainVirus = this.scene.physics.add.image(
             Phaser.Math.Between(Const.scene.width, Const.scene.width *1.3), 
             Phaser.Math.Between(Const.scene.height*0.2, Const.scene.height *0.85), 
             TextureKeys.Virus)
             .setDepth(3)
             .setTint(0x1CF8E4, 0xff0000, 0xff00ff, 0xffff00)
-        var body = this.virus.body as Phaser.Physics.Arcade.Body;
+        var body = this.mainVirus.body as Phaser.Physics.Arcade.Body;
         body.setCircle(200);
-        this.add(this.virus);
+        this.add(this.mainVirus);
     }
 
     private initGroupVirus(){
         this.groupVirus = this.scene.physics.add.group();
         for(var i=0;i<10;i++){
             var virus = this.scene.physics.add.image(
-                this.virus.x, 
-                this.virus.y, 
+                this.mainVirus.x, 
+                this.mainVirus.y, 
                 TextureKeys.Virus)
                 .setDepth(2)
                 .setTint(0x0000ff, 0xff0000, 0xff00ff, 0xffff00)
@@ -61,14 +58,18 @@ export default class Virus extends Phaser.GameObjects.Container{
     }
 
     private virusLifeCycle(){
-        Phaser.Actions.SetXY(this.groupVirus.getChildren(), this.virus.x, this.virus.y)
+        Phaser.Actions.SetXY(this.groupVirus.getChildren(), this.mainVirus.x, this.mainVirus.y)
         this.groupVirus.getChildren().forEach(virus => {
             var body = virus.body as Phaser.Physics.Arcade.Body;
             this.scene.physics.velocityFromRotation(Phaser.Math.Between(-Math.PI,Math.PI), 300, body.velocity);
         })
     }
 
-    setSpeed(speed: number){
-        this.speed = speed;
+    getMainVirus(){
+        return this.mainVirus;
+    }
+
+    getGroupVirus() {
+        return this.groupVirus;
     }
 }

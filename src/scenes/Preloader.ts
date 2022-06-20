@@ -61,12 +61,7 @@ export default class Preloader extends Phaser.Scene{
             TextureKeys.Bullet2,
             'Images/bullet2.png',
             'Images/bullet2.json'
-        )
-        this.load.atlas(
-            TextureKeys.Mage,
-            'Images/Mage.png',
-            'Images/Mage.json'
-        )    
+        )   
         this.load.audio(AudioKeys.Fly,[
             'audio/swoosh.mp3'
         ])
@@ -87,7 +82,6 @@ export default class Preloader extends Phaser.Scene{
         ])
 
         this.load.on('progress', function (value) {
-            console.log(value);
             progressBar.clear();
             progressBar.fillStyle(0xffffff, 1);
             progressBar.fillRect(250, 280, 300 * value, 30);
@@ -142,6 +136,6 @@ export default class Preloader extends Phaser.Scene{
             frameRate: 10,
             repeat: 0 // -1 to loop forever
         })
-        this.scene.start(SceneKeys.Game); 
+        this.scene.start(SceneKeys.StartGame); 
     }
 }
