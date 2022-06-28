@@ -69,11 +69,12 @@ export default class PlayScene extends Phaser.Scene {
     }
 
     update(time: number, delta: number): void {
-        this.background.tilePositionX -= (this.speed-0.2);
-        this.ground.tilePositionX += this.speed;
-        this.virus.getMainVirus().x -= this.speed;
-        Phaser.Actions.IncX(this.listPipe.getListPipe().getChildren(), -this.speed)
-        Phaser.Actions.IncX(this.listPipe.getCheckPoists().getChildren(), -this.speed)
+        console.log("update: " + delta);
+        this.background.tilePositionX -= (this.speed-0.2)*(delta/Const.dtOn240Fps);
+        this.ground.tilePositionX += this.speed*(delta/Const.dtOn240Fps);
+        this.virus.getMainVirus().x -= this.speed*(delta/Const.dtOn240Fps);
+        Phaser.Actions.IncX(this.listPipe.getListPipe().getChildren(), -this.speed*(delta/Const.dtOn240Fps))
+        Phaser.Actions.IncX(this.listPipe.getCheckPoists().getChildren(), -this.speed*(delta/Const.dtOn240Fps))
         if(this.bird.y >= Const.scene.height-100-50){
             this.handleGameOver(this.bird,this.bird)
         }  

@@ -12,6 +12,7 @@ var Const = {
         height: 600,
     },
     defaultNumBullets: 3,
+    dtOn240Fps: 4.17,
 }  
 
 export default Const;

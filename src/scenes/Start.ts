@@ -39,10 +39,10 @@ export default class Start extends Phaser.Scene{
                 this.scene.start(SceneKeys.Game); 
         } );
     }
-    update(){
+    update(time: number, delta: number){
         const {width, height} = this.scale;
-        this.background.tilePositionX += Const.speed;
-        this.ground.tilePositionX += Const.speed;
+        this.background.tilePositionX += Const.speed*(delta/Const.dtOn240Fps);
+        this.ground.tilePositionX += Const.speed*(delta/Const.dtOn240Fps);
         if(this.bird.y > height*0.3){
             const body = this.bird.body as Phaser.Physics.Arcade.Body;
             body.setVelocityY(-300);
