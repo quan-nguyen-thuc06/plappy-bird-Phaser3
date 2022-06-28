@@ -69,7 +69,6 @@ export default class PlayScene extends Phaser.Scene {
     }
 
     update(time: number, delta: number): void {
-        console.log("update: " + delta);
         this.background.tilePositionX -= (this.speed-0.2)*(delta/Const.dtOn240Fps);
         this.ground.tilePositionX += this.speed*(delta/Const.dtOn240Fps);
         this.virus.getMainVirus().x -= this.speed*(delta/Const.dtOn240Fps);
