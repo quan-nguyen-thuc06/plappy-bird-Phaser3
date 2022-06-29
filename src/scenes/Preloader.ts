@@ -34,7 +34,7 @@ export default class Preloader extends Phaser.Scene{
             'Images/obstacle/pipe-green.png');
         this.load.image(
             TextureKeys.GameOver,
-            'Images/panelGameOver/gameOver.png'
+            'Images/panelGameOver/game-over.png'
         )
         this.load.image(
             TextureKeys.ReplayButton,
