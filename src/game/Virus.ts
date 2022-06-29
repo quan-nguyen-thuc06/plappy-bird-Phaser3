@@ -48,7 +48,7 @@ export default class Virus extends Phaser.GameObjects.Container{
                 this.mainVirus.x, 
                 this.mainVirus.y, 
                 TextureKeys.Virus)
-                .setDepth(2)
+                .setDepth(3)
                 .setTint(0x0000ff, 0xff0000, 0xff00ff, 0xffff00)
                 .setDisplaySize(50,50)
                 .setOrigin(0)

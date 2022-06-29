@@ -51,11 +51,11 @@ export default class PlayScene extends Phaser.Scene {
         this.speed = Const.speed;
         this.checkPlayAudioHit = false;
         // init 
+        this.intiBackground(); 
         this.initListPipe();
         this.initInfor();
-        this.initVirus();
-        this.intiBackground();
         this.initBird();
+        this.initVirus();
         this.initHandleInput();
         this.initDestroyBullet();
         this.initTimerEvents();

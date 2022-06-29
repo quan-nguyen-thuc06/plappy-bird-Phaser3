@@ -45,10 +45,6 @@ export default class Preloader extends Phaser.Scene{
             'Images/gameStart/message.png'
         )
         this.load.image(
-            TextureKeys.Bullet,
-            'Images/bullet.png'
-        )
-        this.load.image(
             TextureKeys.Virus,
             'Images/virus3.png'
         )
